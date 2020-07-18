@@ -1,4 +1,4 @@
-package com.netty.in.action.samples.chapter04;
+package com.netty.in.action.samples.chapter04.server;
 
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;

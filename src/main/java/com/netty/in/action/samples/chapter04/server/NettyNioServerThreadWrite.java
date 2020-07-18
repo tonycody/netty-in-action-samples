@@ -1,4 +1,4 @@
-package com.netty.in.action.samples.chapter04;
+package com.netty.in.action.samples.chapter04.server;
 
 import java.net.InetSocketAddress;
 
@@ -16,11 +16,10 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.util.CharsetUtil;
 
 /**
- * Asynchronous networking with Netty
  * @author whq46936
- * @version Id: NettyNioServer, v 0.1 2020/6/23 09:11 whq46936 Exp $
+ * @version Id: NettyNioServerThreadWrite, v 0.1 2020/7/6 09:31 whq46936 Exp $
  */
-public class NettyNioServer {
+public class NettyNioServerThreadWrite {
 
     /**
      * 服务器
@@ -29,13 +28,15 @@ public class NettyNioServer {
      * @throws Exception 异常
      */
     public void server(int port) throws Exception {
-        ByteBuf           buf   = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer("Hi!\r\n", CharsetUtil.UTF_8));
+        ByteBuf           buf    = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer("Hi!\r\n", CharsetUtil.UTF_8));
+        ByteBuf           newBuf = Unpooled.copiedBuffer("your data", CharsetUtil.UTF_8);
         // 事件循环组
-        NioEventLoopGroup group = new NioEventLoopGroup();
+        NioEventLoopGroup group  = new NioEventLoopGroup();
+
         try {
             // 用来引导服务器配置
             ServerBootstrap serverBootstrap = new ServerBootstrap();
-            // 使用OIO阻塞模式
+            // 使用NIO异步模式
             serverBootstrap.group(group)
                            .channel(NioServerSocketChannel.class)
                            .localAddress(new InetSocketAddress(port))
@@ -43,6 +44,7 @@ public class NettyNioServer {
                                // 指定 ChannelInitializer 初始化 handlers
                                @Override
                                protected void initChannel(Channel ch) throws Exception {
+                                   // 添加一个"入站"handler到ChannelPipeline
                                    ch.pipeline()
                                      .addLast(new ChannelInboundHandlerAdapter() {
                                          @Override
@@ -52,14 +54,30 @@ public class NettyNioServer {
                                                 .addListener(ChannelFutureListener.CLOSE);
                                          }
                                      });
+                                   ChannelFuture cf = ch.write(newBuf);
+                                   cf.addListener(new ChannelFutureListener() {
+                                       @Override
+                                       public void operationComplete(ChannelFuture future) throws Exception {
+                                           if (future.isSuccess()) {
+                                               System.out.println(".Write successful.");
+                                           } else {
+                                               System.err.println("。Write error.");
+                                               future.cause()
+                                                     .printStackTrace();
+                                           }
+                                       }
+                                   });
                                }
                            });
+
+            // 绑定服务器接受连接
             ChannelFuture channelFuture = serverBootstrap.bind()
                                                          .sync();
             channelFuture.channel()
                          .closeFuture()
                          .sync();
         } catch (Exception e) {
+            // 释放所有资源
             group.shutdownGracefully();
         }
     }

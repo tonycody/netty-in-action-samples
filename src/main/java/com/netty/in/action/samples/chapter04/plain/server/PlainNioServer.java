@@ -1,4 +1,4 @@
-package com.netty.in.action.samples.chapter04.server;
+package com.netty.in.action.samples.chapter04.plain.server;
 
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -25,36 +25,39 @@ public class PlainNioServer {
      */
     public void server(int port) throws Exception {
         System.out.println("Listening for connections on port " + port);
-        //open selector that handles channels
-        Selector selector = Selector.open();
+        // open selector that handles channels
+        Selector            selector            = Selector.open();
         // open ServerSocketChannel
         ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
         // get ServerSocket
-        ServerSocket serverSocket = serverSocketChannel.socket();
+        ServerSocket        serverSocket        = serverSocketChannel.socket();
         // bind server to port
         serverSocket.bind(new InetSocketAddress(port));
         // set to no-blocking
-        serverSocketChannel.configureBlocking(true);
+        serverSocketChannel.configureBlocking(false);
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
         ByteBuffer msg = ByteBuffer.wrap("Hi!\r\n".getBytes());
         while (true) {
             int n = selector.select();
             if (n > 0) {
-                Iterator<SelectionKey> iterator = selector.selectedKeys().iterator();
+                Iterator<SelectionKey> iterator = selector.selectedKeys()
+                                                          .iterator();
                 while (iterator.hasNext()) {
                     SelectionKey selectionKey = iterator.next();
                     iterator.remove();
                     try {
-                        // Check if event was because new client ready to get accepted
+                        // Check if event was because new client ready to get
+                        // accepted
                         if (selectionKey.isAcceptable()) {
                             ServerSocketChannel server = (ServerSocketChannel) selectionKey.channel();
                             SocketChannel       client = server.accept();
                             System.out.println("Accepted connection from " + client);
                             client.configureBlocking(false);
-                            //Accept client and register it to selector
+                            // Accept client and register it to selector
                             client.register(selector, SelectionKey.OP_WRITE, msg.duplicate());
                         }
-                        // Check if event was because socket is ready to write data
+                        // Check if event was because socket is ready to write
+                        // data
                         if (selectionKey.isWritable()) {
                             SocketChannel client = (SocketChannel) selectionKey.channel();
                             ByteBuffer    buff   = (ByteBuffer) selectionKey.attachment();
@@ -69,11 +72,11 @@ public class PlainNioServer {
                         }
                     } catch (Exception e) {
                         selectionKey.cancel();
-                        selectionKey.channel().close();
+                        selectionKey.channel()
+                                    .close();
                     }
                 }
             }
         }
-
     }
 }

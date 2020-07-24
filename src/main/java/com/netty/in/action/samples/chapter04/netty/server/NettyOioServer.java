@@ -1,5 +1,6 @@
-package com.netty.in.action.samples.chapter04.server;
+package com.netty.in.action.samples.chapter04.netty.server;
 
+import io.netty.channel.oio.OioEventLoopGroup;
 import java.net.InetSocketAddress;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -23,12 +24,12 @@ public class NettyOioServer {
      * @throws Exception 异常
      */
     public void server(int port) throws Exception {
-        ByteBuf           buf             = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer("Hi!\r\n", CharsetUtil.UTF_8));
+        ByteBuf        buf   = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer("Hi!\r\n", CharsetUtil.UTF_8));
         // 事件循环组
-        NioEventLoopGroup group           = new NioEventLoopGroup();
+        EventLoopGroup group = new OioEventLoopGroup();
         try {
             // 用来引导服务器配置
-            ServerBootstrap   serverBootstrap = new ServerBootstrap();
+            ServerBootstrap serverBootstrap = new ServerBootstrap();
             // 使用OIO阻塞模式
             serverBootstrap.group(group)
                            .channel(OioServerSocketChannel.class)
@@ -48,8 +49,11 @@ public class NettyOioServer {
                                      });
                                }
                            });
-            ChannelFuture channelFuture = serverBootstrap.bind().sync();
-            channelFuture.channel().closeFuture().sync();
+            ChannelFuture channelFuture = serverBootstrap.bind()
+                                                         .sync();
+            channelFuture.channel()
+                         .closeFuture()
+                         .sync();
         } catch (Exception e) {
             group.shutdownGracefully();
         }

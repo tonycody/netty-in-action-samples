@@ -36,26 +36,39 @@ public class EchoServer {
      * @throws Exception when
      */
     private void start() throws Exception {
+        System.out.println("server bootstrap successful.");
         EventLoopGroup group = new NioEventLoopGroup();
         try {
             // create ServerBootstrap instance
             ServerBootstrap b = new ServerBootstrap();
-            b.group(group).channel(NioServerSocketChannel.class).localAddress(port).childHandler(new ChannelInitializer<Channel>() {
-                /**
-                 * Method initChannel ...
-                 *
-                 * @param ch of type Channel
-                 * @throws Exception when
-                 */
-                @Override public void initChannel(Channel ch) throws Exception {
-                    ch.pipeline().addLast(new EchoServerHandler());
-                }
-            });
-            ChannelFuture f = b.bind().sync();
-            System.err.println(this.getClass().getName() + " :::::::::::::::::::::::::::::::: started and listen on " + f.channel().localAddress());
-            f.channel().closeFuture().sync();
+            b.group(group)
+             .channel(NioServerSocketChannel.class)
+             .localAddress(port)
+             .childHandler(new ChannelInitializer<Channel>() {
+                 /**
+                  * Method initChannel ...
+                  *
+                  * @param ch of type Channel
+                  * @throws Exception when
+                  */
+                 @Override
+                 public void initChannel(Channel ch) throws Exception {
+                     ch.pipeline()
+                       .addLast(new EchoServerHandler());
+                 }
+             });
+            ChannelFuture f = b.bind()
+                               .sync();
+            System.err.println(this.getClass()
+                                   .getName()
+                               + " :::::::::::::::::::::::::::::::: started and listen on " + f.channel()
+                                                                                               .localAddress());
+            f.channel()
+             .closeFuture()
+             .sync();
         } finally {
-            group.shutdownGracefully().sync();
+            group.shutdownGracefully()
+                 .sync();
         }
     }
 

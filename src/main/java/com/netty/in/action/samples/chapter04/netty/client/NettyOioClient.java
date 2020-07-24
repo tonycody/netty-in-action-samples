@@ -1,22 +1,21 @@
-package com.netty.in.action.samples.chapter02.client;
+package com.netty.in.action.samples.chapter04.netty.client;
 
+import com.netty.in.action.samples.chapter02.client.EchoClientHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.oio.OioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
-
+import io.netty.channel.socket.oio.OioSocketChannel;
 import java.net.InetSocketAddress;
 
 /**
- * 客户端
- *
  * @author whq46936
- * @version Id: EchoClient, v 0.1 2020/6/16 09:53 whq46936 Exp $
+ * @version Id: NettyOioClient, v 0.1 2020/7/22 19:29 whq46936 Exp $
  */
-public class EchoClient {
+public class NettyOioClient {
+
     /**
      * 主机
      */
@@ -27,30 +26,17 @@ public class EchoClient {
      */
     private final int    port;
 
-    /**
-     * 默认构造器
-     * 基于host/port
-     *
-     * @param host of type String
-     * @param port of type int
-     */
-    public EchoClient(String host, int port) {
+    public NettyOioClient(String host, int port) {
         this.host = host;
         this.port = port;
     }
 
-    /**
-     * 启动
-     *
-     * @throws Exception when
-     */
     public void start() throws Exception {
-        System.out.println("client bootstrap start.");
-        EventLoopGroup group = new NioEventLoopGroup();
+        EventLoopGroup group = new OioEventLoopGroup();
         try {
             Bootstrap b = new Bootstrap();
             b.group(group)
-             .channel(NioSocketChannel.class)
+             .channel(OioSocketChannel.class)
              .remoteAddress(new InetSocketAddress(host, port))
              .handler(new ChannelInitializer<SocketChannel>() {
                  @Override
@@ -72,26 +58,5 @@ public class EchoClient {
             group.shutdownGracefully()
                  .sync();
         }
-    }
-
-    /**
-     * Method bootstrap ...
-     *
-     * @param host of type String
-     * @param port of type int
-     * @throws Exception when
-     */
-    public static void bootstrap(String host, int port) throws Exception {
-        new EchoClient(host, port).start();
-    }
-
-    /**
-     * Method main ...
-     *
-     * @param args of type String[]
-     * @throws Exception when
-     */
-    public static void main(String[] args) throws Exception {
-        new EchoClient("127.0.0.1", 20000).start();
     }
 }

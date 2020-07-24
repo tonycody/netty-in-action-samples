@@ -10,6 +10,10 @@ repositories {
 }
 
 dependencies {
-    testCompile 'junit:junit:4.13'
     implementation 'io.netty:netty-all:4.1.51.Final'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    testCompile 'junit:junit:4.13'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+    testCompileOnly 'org.projectlombok:lombok:1.18.12'
 }

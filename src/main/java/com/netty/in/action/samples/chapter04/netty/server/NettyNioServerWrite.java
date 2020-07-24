@@ -1,5 +1,6 @@
-package com.netty.in.action.samples.chapter04.server;
+package com.netty.in.action.samples.chapter04.netty.server;
 
+import io.netty.channel.EventLoopGroup;
 import java.net.InetSocketAddress;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -17,9 +18,9 @@ import io.netty.util.CharsetUtil;
 
 /**
  * @author whq46936
- * @version Id: NettyNioServerThreadWrite, v 0.1 2020/7/6 09:31 whq46936 Exp $
+ * @version Id: NettyNioServerWrite, v 0.1 2020/7/6 09:31 whq46936 Exp $
  */
-public class NettyNioServerThreadWrite {
+public class NettyNioServerWrite {
 
     /**
      * 服务器
@@ -28,10 +29,11 @@ public class NettyNioServerThreadWrite {
      * @throws Exception 异常
      */
     public void server(int port) throws Exception {
-        ByteBuf           buf    = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer("Hi!\r\n", CharsetUtil.UTF_8));
-        ByteBuf           newBuf = Unpooled.copiedBuffer("your data", CharsetUtil.UTF_8);
+        System.out.println("server bootstrap start.");
+        ByteBuf        buf    = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer("Hi!\r\n", CharsetUtil.UTF_8));
+        ByteBuf        newBuf = Unpooled.copiedBuffer("your data", CharsetUtil.UTF_8);
         // 事件循环组
-        NioEventLoopGroup group  = new NioEventLoopGroup();
+        EventLoopGroup group  = new NioEventLoopGroup();
 
         try {
             // 用来引导服务器配置
@@ -43,18 +45,18 @@ public class NettyNioServerThreadWrite {
                            .childHandler(new ChannelInitializer<Channel>() {
                                // 指定 ChannelInitializer 初始化 handlers
                                @Override
-                               protected void initChannel(Channel ch) throws Exception {
+                               protected void initChannel(Channel channel) throws Exception {
                                    // 添加一个"入站"handler到ChannelPipeline
-                                   ch.pipeline()
-                                     .addLast(new ChannelInboundHandlerAdapter() {
-                                         @Override
-                                         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-                                             // 连接后，写消息到客户端，写完后便关闭连接
-                                             ctx.writeAndFlush(buf.duplicate())
-                                                .addListener(ChannelFutureListener.CLOSE);
-                                         }
-                                     });
-                                   ChannelFuture cf = ch.write(newBuf);
+                                   channel.pipeline()
+                                          .addLast(new ChannelInboundHandlerAdapter() {
+                                              @Override
+                                              public void channelActive(ChannelHandlerContext ctx) throws Exception {
+                                                  // 连接后，写消息到客户端，写完后便关闭连接
+                                                  ctx.writeAndFlush(buf.duplicate())
+                                                     .addListener(ChannelFutureListener.CLOSE);
+                                              }
+                                          });
+                                   ChannelFuture cf = channel.write(newBuf);
                                    cf.addListener(new ChannelFutureListener() {
                                        @Override
                                        public void operationComplete(ChannelFuture future) throws Exception {

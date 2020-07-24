@@ -1,4 +1,4 @@
-package com.netty.in.action.samples.chapter04.server;
+package com.netty.in.action.samples.chapter04.plain.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
